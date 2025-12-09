@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs;
 
 fn get_line(input_file: &str) -> Result<String, std::io::Error> {
@@ -35,12 +36,45 @@ fn part1(input_file: &str) -> u64 {
     result
 }
 
-fn part2() {
+fn part2(input_file: &str) -> u64 {
+    let mut result = 0;
+    let mut nums: HashSet<u64> = HashSet::new();
+    let line = get_line(input_file).expect("Cannot get line");
+    let ranges = line.split(",").map(|s| s.trim()).collect::<Vec<&str>>();
+    for range in ranges.iter() {
+        let parts = range.split("-").collect::<Vec<_>>();
+        let (start_range, end_range) = (parts[0], parts[1]);
 
+        // Invalid if it starts with 0
+        if start_range.starts_with("0") {
+            continue;
+        }
+
+        let start = start_range.parse::<u64>().expect("Cannot get start range");
+        let end = end_range.parse::<u64>().expect("Cannot get end range");
+
+        for i in start..=end {
+            let s = i.to_string();
+            let chars = s.chars().collect::<Vec<char>>();
+            // This is terrible
+            for j in 1..=chars.len() / 2 {
+                let chunks = chars
+                    .chunks(j)
+                    .map(|chunk| chunk.iter().collect())
+                    .collect::<Vec<String>>();
+                let chunks_hash = chunks.iter().collect::<HashSet<_>>();
+                if chunks_hash.len() == 1 && nums.insert(i) {
+                    result += i;
+                }
+            }
+        }
+    }
+    result
 }
 
 fn main() {
     println!("{}", part1("./src/bin/day02/input.txt"));
+    println!("{}", part2("./src/bin/day02/input.txt"));
 }
 
 #[cfg(test)]
@@ -50,5 +84,10 @@ mod tests {
     #[test]
     fn test_part1() {
         assert_eq!(part1("./src/bin/day02/test.txt"), 1227775554_u64);
+    }
+
+    #[test]
+    fn test_part2() {
+        assert_eq!(part2("./src/bin/day02/test.txt"), 4174379265_u64);
     }
 }
