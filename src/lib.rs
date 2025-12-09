@@ -26,6 +26,33 @@ pub mod day01 {
     }
 }
 
+pub mod day05 {
+    #[derive(Debug)]
+    pub struct Range {
+        pub start: u64,
+        pub end: u64,
+    }
+
+    pub fn merge_ranges(mut ranges: Vec<Range>) -> Vec<Range> {
+        ranges.sort_by_key(|r| r.start);
+        let mut result: Vec<Range> = Vec::new();
+        for range in ranges {
+            // Extend the previous range with the current range
+            // if it's overlapping.
+            if let Some(last) = result.last_mut() {
+                if range.start <= last.end {
+                    last.end = last.end.max(range.end);
+                    continue;
+                }
+            }
+
+            result.push(range);
+        }
+
+        result
+    }
+}
+
 // https://doc.rust-lang.org/stable/rust-by-example/std_misc/file/read_lines.html#a-more-efficient-approach
 pub fn read_input<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
 where
